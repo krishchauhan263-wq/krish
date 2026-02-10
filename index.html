@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Love Game 💖</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine?</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<!-- 🎵 MUSIC (ADDED – does not affect game) -->
 <audio id="celebration-music" loop>
     <source src="night-changes.mp3" type="audio/mpeg">
 </audio>
@@ -16,53 +22,67 @@
 <div id="game-container">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- START SCREEN -->
-    <div id="start-screen" class="screen active">
-        <h1>Catch the Love ❤️</h1>
-        <p>Catch hearts to unlock my question…</p>
-        <button id="start-btn" class="btn">Start Game</button>
-    </div>
-
-    <!-- PROPOSAL SCREEN -->
-    <div id="proposal-screen" class="screen hidden">
-        <h1>Will you be my Valentine? 💖</h1>
-        <div class="buttons">
-            <button id="yes-btn" class="btn yes">YES</button>
-            <button id="no-btn" class="btn no">NO</button>
+    <!-- UI Overlay (ORIGINAL) -->
+    <div id="ui-layer">
+        <div id="score-board">
+            <span>❤️ Love Meter:</span>
+            <div class="progress-bar">
+                <div id="love-fill"></div>
+            </div>
         </div>
     </div>
 
-    <!-- CELEBRATION SCREEN -->
-    <div id="celebration-screen" class="screen hidden">
-        <h1>Yaeee 😍</h1>
-        <p id="typed-message"></p>
-        <p id="final-line">Will you stay with me always? ❤️</p>
-        <button id="promise-btn">Press me for 3 sec ❤️</button>
+    <!-- START SCREEN (ORIGINAL) -->
+    <div id="start-screen" class="screen active">
+        <h1>Catch the Love!</h1>
+        <p>Catch enough hearts to reveal a special question...</p>
+        <button id="start-btn" class="btn">Start Game</button>
     </div>
 
-    <!-- PROMISE SCREEN -->
+    <!-- PROPOSAL SCREEN (ORIGINAL) -->
+    <div id="proposal-screen" class="screen hidden">
+        <div class="proposal-content">
+            <h1>Will You Be My Valentine?</h1>
+            <p class="sub-text">You caught my heart! Now I have to ask...</p>
+            <div class="buttons">
+                <button id="yes-btn" class="btn yes-btn">YES!</button>
+                <button id="no-btn" class="btn no-btn">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CELEBRATION SCREEN (ORIGINAL + ADD) -->
+    <div id="celebration-screen" class="screen hidden">
+        <h1>Yaeee I Know You Love Me 😍</h1>
+
+        <!-- ADD: typing message -->
+        <p id="typed-message"></p>
+
+        <!-- ADD: final emotional line -->
+        <p id="final-line" style="opacity:0;">
+            Will you stay with me always? ❤️
+        </p>
+
+        <!-- ADD: 3 second hold button -->
+        <button id="promise-btn" style="opacity:0; pointer-events:none;">
+            Press me for 3 sec ❤️
+        </button>
+    </div>
+
+    <!-- ADD: PROMISE SCREEN (NEW, DOES NOT TOUCH GAME) -->
     <div id="promise-screen" class="screen hidden">
         <h1>Thank You ❤️</h1>
         <p>
-            Main kabhi bhi tumhe sad nahi hone dunga 🫶<br>
+            Main kabhi tumhe sad nahi hone dunga 🫶<br>
             Tumhari har muskaan meri zimmedari hai 💕<br>
-            Har mushkil mein tumhara haath pakad kar chalunga ✨<br><br>
-            I promise… hamesha tumhare saath rahunga 💖<br>
+            Har mushkil mein tumhara haath pakad ke rahunga ✨<br><br>
+            I promise… hamesha tumhare saath 💖<br>
             — Krish
         </p>
     </div>
+
 </div>
 
 <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
