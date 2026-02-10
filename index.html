@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Will You Be My Valentine?</title>
 
+    <!-- Fonts (ORIGINAL) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -14,15 +15,17 @@
 
 <body>
 
-<!-- 🎵 MUSIC (ADDED – does not affect game) -->
+<!-- 🎵 MUSIC (NEW – does NOT affect game) -->
 <audio id="celebration-music" loop>
     <source src="night-changes.mp3" type="audio/mpeg">
 </audio>
 
 <div id="game-container">
+
+    <!-- CANVAS GAME (ORIGINAL) -->
     <canvas id="gameCanvas"></canvas>
 
-    <!-- UI Overlay (ORIGINAL) -->
+    <!-- UI LAYER (ORIGINAL) -->
     <div id="ui-layer">
         <div id="score-board">
             <span>❤️ Love Meter:</span>
@@ -51,25 +54,21 @@
         </div>
     </div>
 
-    <!-- CELEBRATION SCREEN (ORIGINAL + ADD) -->
+    <!-- CELEBRATION SCREEN (ORIGINAL + NEW) -->
     <div id="celebration-screen" class="screen hidden">
         <h1>Yaeee I Know You Love Me 😍</h1>
 
-        <!-- ADD: typing message -->
+        <!-- NEW -->
         <p id="typed-message"></p>
 
-        <!-- ADD: final emotional line -->
-        <p id="final-line" style="opacity:0;">
-            Will you stay with me always? ❤️
-        </p>
+        <!-- NEW -->
+        <p id="final-line">Will you stay with me always? ❤️</p>
 
-        <!-- ADD: 3 second hold button -->
-        <button id="promise-btn" style="opacity:0; pointer-events:none;">
-            Press me for 3 sec ❤️
-        </button>
+        <!-- NEW -->
+        <button id="promise-btn">Press me for 3 sec ❤️</button>
     </div>
 
-    <!-- ADD: PROMISE SCREEN (NEW, DOES NOT TOUCH GAME) -->
+    <!-- PROMISE SCREEN (NEW) -->
     <div id="promise-screen" class="screen hidden">
         <h1>Thank You ❤️</h1>
         <p>
