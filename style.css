@@ -1,33 +1,83 @@
+:root {
+    --primary-color: #ff4d6d;
+    --secondary-color: #ff8fa3;
+    --accent-color: #c9184a;
+    --bg-gradient: linear-gradient(135deg, #fff0f3 0%, #ffccd5 100%);
+    --font-heading: 'Great Vibes', cursive;
+    --font-body: 'Poppins', sans-serif;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
 }
 
 body {
-    background: linear-gradient(135deg, #ff4d6d, #ff8fa3);
+    width: 100vw;
     height: 100vh;
     overflow: hidden;
+    font-family: var(--font-body);
+    background: var(--bg-gradient);
+}
+
+/* GAME */
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 canvas {
-    position: absolute;
-    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
     pointer-events: none;
 }
 
+/* UI */
+#ui-layer {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+}
+
+#score-board {
+    background: rgba(255,255,255,0.85);
+    padding: 10px 20px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--accent-color);
+}
+
+.progress-bar {
+    width: 150px;
+    height: 15px;
+    background: #ffe5ec;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#love-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,var(--primary-color),var(--accent-color));
+}
+
+/* SCREENS */
 .screen {
     position: absolute;
     inset: 0;
+    background: rgba(255,240,243,0.95);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(255,240,243,0.95);
     z-index: 50;
     text-align: center;
-    padding: 20px;
 }
 
 .screen.hidden {
@@ -35,78 +85,61 @@ canvas {
 }
 
 h1 {
-    font-size: 3rem;
-    color: #c9184a;
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    color: var(--accent-color);
     margin-bottom: 20px;
 }
 
 p {
-    max-width: 700px;
     font-size: 1.1rem;
-    line-height: 1.6;
     color: #590d22;
+    max-width: 700px;
+    margin-bottom: 20px;
 }
 
-.btn {
+/* BUTTONS */
+.btn, #promise-btn {
     padding: 15px 40px;
-    margin-top: 20px;
-    border: none;
     border-radius: 40px;
+    border: none;
     font-size: 1.1rem;
     cursor: pointer;
-    background: #ff4d6d;
+    background: var(--primary-color);
     color: white;
 }
 
-.yes { background: #2dc653; }
-.no { background: #ffb703; }
+.yes-btn { background: #2dc653; }
+.no-btn { background: #ffb703; }
 
+/* NEW EFFECTS */
 #final-line {
     opacity: 0;
-    margin-top: 20px;
     transition: opacity 2s ease;
 }
 
 #promise-btn {
-    margin-top: 30px;
-    padding: 15px 35px;
-    border-radius: 40px;
-    background: linear-gradient(135deg, #ff4d6d, #ff8fa3);
-    color: white;
     opacity: 0;
     pointer-events: none;
 }
 
 #promise-btn.hold {
     transform: scale(0.95);
-    background: #c9184a;
+    background: var(--accent-color);
 }
 
-/* HEART BEAT */
+/* HEARTBEAT */
 .beat {
     animation: beatPulse 0.6s ease-in-out;
 }
+
 @keyframes beatPulse {
     0% { transform: scale(1); }
     30% { transform: scale(1.12); }
     60% { transform: scale(1); }
 }
 
-/* FLOATING HEARTS */
-.heart {
-    position: absolute;
-    bottom: -30px;
-    font-size: 20px;
-    animation: floatUp 6s linear forwards;
-}
-@keyframes floatUp {
-    to {
-        transform: translateY(-120vh);
-        opacity: 0;
-    }
-}
-
-/* CONFETTI / FIREWORK */
+/* FIREWORKS */
 .firework {
     position: absolute;
     width: 6px;
@@ -115,12 +148,10 @@ p {
     border-radius: 50%;
     animation: explode 1.5s ease-out forwards;
 }
+
 @keyframes explode {
     to {
         transform: translate(var(--x), var(--y));
         opacity: 0;
     }
 }
-
-
-
