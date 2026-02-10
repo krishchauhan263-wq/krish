@@ -1,382 +1,98 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-// Game State
-let gameState = 'START'; // START, PLAYING, WON, PROPOSAL, END
-let score = 0;
-const WIN_SCORE = 15; // Hearts needed to fill the meter
-let player;
-let hearts = [];
-let particles = []; // For effects
-let animationId;
-let loveMeter = document.getElementById('love-fill');
-let beatInterval;
+const startScreen = document.getElementById("start-screen");
+const proposalScreen = document.getElementById("proposal-screen");
+const celebrationScreen = document.getElementById("celebration-screen");
+const promiseScreen = document.getElementById("promise-screen");
 
-// DOM Elements
-const startScreen = document.getElementById('start-screen');
-const proposalScreen = document.getElementById('proposal-screen');
-const celebrationScreen = document.getElementById('celebration-screen');
-const startBtn = document.getElementById('start-btn');
-const yesBtn = document.getElementById('yes-btn');
-const noBtn = document.getElementById('no-btn');
+const startBtn = document.getElementById("start-btn");
+const yesBtn = document.getElementById("yes-btn");
+const noBtn = document.getElementById("no-btn");
 
-// Resize Handling
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    if (player) {
-         player.y = canvas.height - 100;
-    }
-}
-window.addEventListener('resize', resize);
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-// Player Object
-class Player {
-    constructor() {
-        this.w = 100; // width
-        this.h = 80;  // height
-        this.x = canvas.width / 2 - this.w / 2;
-        this.y = canvas.height - 100;
-        this.speed = 10;
-        this.dx = 0;
-    }
-
-    draw() {
-        // Draw a cute basket or cup (using simple shapes for now, can be improved or replaced with image)
-        ctx.fillStyle = '#ff4d6d';
-        
-        // Simple semi-circle basket
-        ctx.beginPath();
-        ctx.arc(this.x + this.w/2, this.y, this.w/2, 0, Math.PI, false);
-        ctx.fill();
-        
-        // Handle
-        ctx.beginPath();
-        ctx.strokeStyle = '#c9184a';
-        ctx.lineWidth = 5;
-        ctx.arc(this.x + this.w/2, this.y - 10, this.w/2, Math.PI, 0, false);
-        ctx.stroke();
-    }
-
-    update() {
-        this.x += this.dx;
-        
-        // Boundaries
-        if (this.x < 0) this.x = 0;
-        if (this.x + this.w > canvas.width) this.x = canvas.width - this.w;
-    }
-}
-
-// Heart Object
-class Heart {
-    constructor() {
-        this.size = Math.random() * 20 + 20; // 20-40px
-        this.x = Math.random() * (canvas.width - this.size);
-        this.y = -this.size;
-        this.speed = Math.random() * 3 + 2; // 2-5 speed
-        this.color = `hsl(${Math.random() * 20 + 340}, 100%, 60%)`; // Pinkish/Red variations
-    }
-
-    draw() {
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        let topCurveHeight = this.size * 0.3;
-        ctx.moveTo(this.x, this.y + topCurveHeight);
-        // top left curve
-        ctx.bezierCurveTo(
-            this.x, this.y, 
-            this.x - this.size / 2, this.y, 
-            this.x - this.size / 2, this.y + topCurveHeight
-        );
-        // bottom left curve
-        ctx.bezierCurveTo(
-            this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, 
-            this.x, this.y + (this.size + topCurveHeight) / 2, 
-            this.x, this.y + this.size
-        );
-        // bottom right curve
-        ctx.bezierCurveTo(
-            this.x, this.y + (this.size + topCurveHeight) / 2, 
-            this.x + this.size / 2, this.y + (this.size + topCurveHeight) / 2, 
-            this.x + this.size / 2, this.y + topCurveHeight
-        );
-        // top right curve
-        ctx.bezierCurveTo(
-            this.x + this.size / 2, this.y, 
-            this.x, this.y, 
-            this.x, this.y + topCurveHeight
-        );
-        ctx.fill();
-    }
-
-    update() {
-        this.y += this.speed;
-    }
-}
-
-// Particle Effect
-class Particle {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.size = Math.random() * 5 + 2;
-        this.speedX = (Math.random() - 0.5) * 4;
-        this.speedY = (Math.random() - 0.5) * 4;
-        this.life = 100;
-        this.color = `rgba(255, 255, 255, 0.8)`;
-    }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        this.life -= 2;
-    }
-    draw() {
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = this.life / 100;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-    }
-}
-
-// Input Handling
-function handleInput(e) {
-    if (!player) return;
-    
-    // Mouse / Touch
-    if (e.type === 'mousemove' || e.type === 'touchmove') {
-        const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
-        player.x = clientX - player.w / 2;
-    }
-}
-
-window.addEventListener('mousemove', handleInput);
-window.addEventListener('touchmove', handleInput, { passive: false });
-
-// Game Functions
-function spawnHeart() {
-    if (Math.random() < 0.02) {
-        hearts.push(new Heart());
-    }
-}
-
-function updateGame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-
-    if (gameState === 'PLAYING') {
-        player.update();
-        player.draw();
-
-        spawnHeart();
-
-        hearts.forEach((heart, index) => {
-            heart.update();
-            heart.draw();
-
-            // Collision Detection
-            // Simple box-ish collision for now
-            if (
-                heart.y + heart.size > player.y &&
-                heart.x > player.x &&
-                heart.x < player.x + player.w
-            ) {
-                // Catch!
-                hearts.splice(index, 1);
-                score++;
-                createParticles(heart.x, heart.y);
-                updateScore();
-                
-                if (score >= WIN_SCORE) {
-                    triggerProposal();
-                }
-            } else if (heart.y > canvas.height) {
-                hearts.splice(index, 1); // Missed
-            }
-        });
-
-        particles.forEach((p, idx) => {
-            p.update();
-            p.draw();
-            if (p.life <= 0) particles.splice(idx, 1);
-        });
-    }
-
-    animationId = requestAnimationFrame(updateGame);
-}
-
-function createParticles(x, y) {
-    for(let i=0; i<5; i++) {
-        particles.push(new Particle(x, y));
-    }
-}
-
-function updateScore() {
-    const percentage = (score / WIN_SCORE) * 100;
-    loveMeter.style.width = `${percentage}%`;
-}
-
-function triggerProposal() {
-    gameState = 'PROPOSAL';
-    // Small delay to let the particle effect finish or just smooth transition
-    setTimeout(() => {
-        proposalScreen.classList.remove('hidden');
-        proposalScreen.classList.add('active');
-        // Stop the loop or keep it running for background? 
-        // Let's keep loop for maybe background falling hearts but pause spawning
-    }, 500);
-}
+/* START GAME */
+startBtn.onclick = () => {
+    startScreen.classList.add("hidden");
+    startGame();
+};
 
 function startGame() {
-    resize();
-    player = new Player();
-    hearts = [];
-    score = 0;
-    updateScore();
-    gameState = 'PLAYING';
-    
-    startScreen.classList.remove('active');
-    startScreen.classList.add('hidden');
-    
-    updateGame();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    setTimeout(() => {
+        proposalScreen.classList.remove("hidden");
+    }, 3000);
 }
 
-// Event Listeners
-startBtn.addEventListener('click', startGame);
+/* NO BUTTON RUN */
+noBtn.onmouseover = () => {
+    noBtn.style.position = "absolute";
+    noBtn.style.left = Math.random()*80 + "%";
+    noBtn.style.top = Math.random()*80 + "%";
+};
 
-yesBtn.addEventListener('click', () => {
-    // Hide proposal screen
-    proposalScreen.classList.remove('active');
-    proposalScreen.classList.add('hidden');
+/* YES BUTTON */
+yesBtn.onclick = () => {
+    proposalScreen.classList.add("hidden");
+    celebrationScreen.classList.remove("hidden");
 
-    // Show celebration screen
-    celebrationScreen.classList.remove('hidden');
-    celebrationScreen.classList.add('active');
-
-    /* 🎶 PLAY MUSIC */
-    const music = document.getElementById('celebration-music');
+    const music = document.getElementById("celebration-music");
     music.volume = 0.6;
-    music.currentTime = 0;
     music.play();
 
-    /* 💓 HEARTBEAT SYNC (title beat) */
-    const title = celebrationScreen.querySelector('h1');
+    const title = celebrationScreen.querySelector("h1");
     setInterval(() => {
-        title.classList.remove('beat');
-        void title.offsetWidth; // force reflow
-        title.classList.add('beat');
-    }, 1000); // heartbeat timing
+        title.classList.remove("beat");
+        void title.offsetWidth;
+        title.classList.add("beat");
+    }, 1000);
 
-    /* 🎆 CONFETTI (ONE TIME) */
     confettiBurst();
-
-    /* ❤️ FLOATING HEARTS */
-    setInterval(() => {
-        createFloatingHearts();
-    }, 600);
-
-    /* ⌨️ START TYPING MESSAGE */
+    setInterval(createFloatingHearts, 600);
     typeMessage();
-});
+};
 
-
-
-// "No" button runs away
-noBtn.addEventListener('mouseover', moveNoButton);
-noBtn.addEventListener('touchstart', moveNoButton);
-
-function moveNoButton() {
-    const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-    const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-    noBtn.style.position = 'fixed';
-    noBtn.style.left = `${x}px`;
-    noBtn.style.top = `${y}px`;
-}
-
-function triggerConfetti() {
-    // Simple confetti effect using particles or similar
-    // We can just reuse the heat/particle engine or add a simple CSS class to body
-    // For now, let's just let it be.
-}
-
-// Initialize
-resize();
-
-const messageText = `Hey Himakshi ❤️
-Bas itna kehna tha ki thank you meri life ka part banne ke liye 🫶
-Tumhari presence hi sab kuch better bana deti hai.
-Tumhari smile, care aur saath — sab bahut special hai mere liye 💕
-Sach mein lucky hoon jo tum meri ho.
-Always grateful for us 😌❤️
-
-— Krish 💫`;
+/* TYPING */
+const text = `Hey Himakshi ❤️
+Thank you meri life ka hissa banne ke liye 🫶
+Tumhari presence sab kuch better bana deti hai 💕
+I am really lucky to have you 😌`;
 
 function typeMessage() {
     const el = document.getElementById("typed-message");
     el.innerHTML = "";
     let i = 0;
-
     const typing = setInterval(() => {
-        el.innerHTML += messageText[i];
+        el.innerHTML += text[i];
         i++;
-
-        if (i >= messageText.length) {
+        if (i >= text.length) {
             clearInterval(typing);
-
-            // 🥹 Show final emotional line
-            setTimeout(() => {
-                const finalLine = document.getElementById("final-line");
-                if (finalLine) finalLine.style.opacity = 1;
-            }, 1500);
-            setTimeout(() => {
-                const btn = document.getElementById("promise-btn");
-                btn.style.opacity = 1;
-                btn.style.pointerEvents = "auto";
-            }, 3000);
+            document.getElementById("final-line").style.opacity = 1;
+            setTimeout(showPromiseBtn, 2000);
         }
     }, 40);
 }
 
-
-function createFloatingHearts() {
-    const heart = document.createElement("div");
-    heart.className = "heart";
-    heart.innerText = "❤️";
-    heart.style.left = Math.random() * 100 + "vw";
-    heart.style.fontSize = Math.random() * 20 + 15 + "px";
-    celebrationScreen.appendChild(heart);
-
-    setTimeout(() => heart.remove(), 6000);
+function showPromiseBtn() {
+    const btn = document.getElementById("promise-btn");
+    btn.style.opacity = 1;
+    btn.style.pointerEvents = "auto";
 }
 
-function confettiBurst() {
-    for (let i = 0; i < 40; i++) {
-        const confetti = document.createElement("div");
-        confetti.className = "confetti";
-        confetti.style.left = Math.random() * 100 + "vw";
-        confetti.style.background = ["#ff4d6d", "#ff8fa3", "#fff"][Math.floor(Math.random()*3)];
-        celebrationScreen.appendChild(confetti);
-
-        setTimeout(() => confetti.remove(), 3000);
-    }
-}
-
-const promiseBtn = document.getElementById("promise-btn");
+/* LONG PRESS */
 let holdTimer;
+const promiseBtn = document.getElementById("promise-btn");
 
-promiseBtn.addEventListener("mousedown", startHold);
-promiseBtn.addEventListener("touchstart", startHold);
-
-promiseBtn.addEventListener("mouseup", cancelHold);
-promiseBtn.addEventListener("mouseleave", cancelHold);
-promiseBtn.addEventListener("touchend", cancelHold);
+promiseBtn.onmousedown = startHold;
+promiseBtn.ontouchstart = startHold;
+promiseBtn.onmouseup = cancelHold;
+promiseBtn.ontouchend = cancelHold;
 
 function startHold() {
     promiseBtn.classList.add("hold");
-
-    holdTimer = setTimeout(() => {
-        openPromiseScreen();
-    }, 3000); // 3 seconds
+    holdTimer = setTimeout(openPromiseScreen, 3000);
 }
 
 function cancelHold() {
@@ -384,52 +100,41 @@ function cancelHold() {
     clearTimeout(holdTimer);
 }
 
-
 function openPromiseScreen() {
-    celebrationScreen.classList.remove("active");
     celebrationScreen.classList.add("hidden");
-
-    const promiseScreen = document.getElementById("promise-screen");
     promiseScreen.classList.remove("hidden");
-    promiseScreen.classList.add("active");
-
     startFireworks();
 }
 
+/* EFFECTS */
+function createFloatingHearts() {
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.innerText = "❤️";
+    h.style.left = Math.random()*100 + "vw";
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 6000);
+}
+
+function confettiBurst() {
+    for (let i = 0; i < 30; i++) {
+        createFirework();
+    }
+}
+
 function startFireworks() {
-    setInterval(() => {
-        for (let i = 0; i < 25; i++) {
-            const fw = document.createElement("div");
-            fw.className = "firework";
-            fw.style.left = Math.random() * window.innerWidth + "px";
-            fw.style.top = Math.random() * window.innerHeight + "px";
-            fw.style.setProperty("--x", (Math.random() * 200 - 100) + "px");
-            fw.style.setProperty("--y", (Math.random() * 200 - 100) + "px");
-
-            document.body.appendChild(fw);
-            setTimeout(() => fw.remove(), 1500);
-        }
-    }, 1200);
+    setInterval(createFirework, 800);
 }
 
-.firework {
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    background: gold;
-    border-radius: 50%;
-    animation: explode 1.5s ease-out forwards;
-}
-
-@keyframes explode {
-    from {
-        transform: translate(0, 0);
-        opacity: 1;
-    }
-    to {
-        transform: translate(var(--x), var(--y));
-        opacity: 0;
+function createFirework() {
+    for (let i = 0; i < 20; i++) {
+        const f = document.createElement("div");
+        f.className = "firework";
+        f.style.left = Math.random()*window.innerWidth + "px";
+        f.style.top = Math.random()*window.innerHeight + "px";
+        f.style.setProperty("--x", Math.random()*200-100 + "px");
+        f.style.setProperty("--y", Math.random()*200-100 + "px");
+        document.body.appendChild(f);
+        setTimeout(() => f.remove(), 1500);
     }
 }
-
-
